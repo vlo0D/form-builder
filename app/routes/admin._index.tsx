@@ -25,11 +25,6 @@ export default function AdminIndex() {
     }
   }
 
-  async function handleTogglePublish(id: string) {
-    await trpc.form.togglePublish.mutate({ id });
-    revalidate();
-  }
-
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -60,9 +55,6 @@ export default function AdminIndex() {
                 <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase">
                   Submissions
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase">
-                  Status
-                </th>
                 <th className="px-4 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase">
                   Actions
                 </th>
@@ -82,25 +74,14 @@ export default function AdminIndex() {
                   <td className="px-4 py-3 text-sm text-gray-600">
                     {form._count.submissions}
                   </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        form.published
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {form.published ? "Published" : "Draft"}
-                    </span>
-                  </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleTogglePublish(form.id)}
+                      <Link
+                        to={`/admin/forms/${form.id}/submissions`}
                         className="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
                       >
-                        {form.published ? "Unpublish" : "Publish"}
-                      </button>
+                        View ({form._count.submissions})
+                      </Link>
                       <Link
                         to={`/admin/forms/${form.id}/edit`}
                         className="rounded px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"

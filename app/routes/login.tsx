@@ -46,7 +46,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
         <h1 className="mb-6 text-center text-2xl font-bold text-gray-900">
-          Admin Login
+          Admin
         </h1>
 
         <Form method="post" className="space-y-4">

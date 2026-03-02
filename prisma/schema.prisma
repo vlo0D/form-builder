@@ -19,7 +19,6 @@ model Form {
   id          String       @id @default(cuid())
   title       String
   description String?
-  published   Boolean      @default(false)
   fields      Field[]
   submissions Submission[]
   user        User         @relation(fields: [userId], references: [id])

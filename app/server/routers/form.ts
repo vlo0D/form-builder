@@ -7,7 +7,6 @@ import { createFormSchema, updateFormSchema } from "~/lib/validation";
 export const formRouter = router({
   listPublished: publicProcedure.query(async ({ ctx }) => {
     return ctx.prisma.form.findMany({
-      where: { published: true },
       include: { fields: { orderBy: { order: "asc" } } },
       orderBy: { createdAt: "desc" },
     });
@@ -106,18 +105,4 @@ export const formRouter = router({
       return ctx.prisma.form.delete({ where: { id: input.id } });
     }),
 
-  togglePublish: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const form = await ctx.prisma.form.findUnique({
-        where: { id: input.id },
-      });
-      if (!form || form.userId !== ctx.userId) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
-      }
-      return ctx.prisma.form.update({
-        where: { id: input.id },
-        data: { published: !form.published },
-      });
-    }),
 });

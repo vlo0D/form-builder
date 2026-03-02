@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useCopilotReadable, useCopilotAction } from "@copilotkit/react-core";
 import { FormPreview } from "./FormPreview";
 import {
   FieldSettingsSidebar,
@@ -35,6 +36,136 @@ export function FormEditor({
   const [error, setError] = useState("");
 
   const selectedField = fields.find((f) => f.clientId === selectedFieldId);
+
+  useCopilotReadable({
+    description: "Current form state: title, description, and list of fields with their settings",
+    value: JSON.stringify({
+      title,
+      description,
+      fields: fields.map((f) => ({
+        label: f.label,
+        type: f.type,
+        placeholder: f.placeholder,
+        required: f.required,
+        options: f.options,
+      })),
+    }),
+  });
+
+  useCopilotAction({
+    name: "addField",
+    description:
+      "Add a new field to the form. Available types: text, number, textarea.",
+    parameters: [
+      {
+        name: "type",
+        type: "string",
+        description: "Field type: text, number, or textarea",
+        required: true,
+      },
+      {
+        name: "label",
+        type: "string",
+        description: "Label shown above the field",
+        required: true,
+      },
+      {
+        name: "placeholder",
+        type: "string",
+        description: "Placeholder text inside the field",
+      },
+      {
+        name: "required",
+        type: "boolean",
+        description: "Whether the field is required",
+      },
+    ],
+    handler: ({ type, label, placeholder, required: isRequired }) => {
+      const validType = (["text", "number", "textarea"].includes(type)
+        ? type
+        : "text") as FieldType;
+      const newField: EditableField = {
+        clientId: generateClientId(),
+        type: validType,
+        label: label || `New ${validType} field`,
+        placeholder: placeholder || "",
+        required: isRequired ?? false,
+        options: {},
+        order: fields.length,
+      };
+      setFields((prev) => [...prev, newField]);
+      setSelectedFieldId(newField.clientId);
+    },
+  });
+
+  useCopilotAction({
+    name: "updateField",
+    description:
+      "Update an existing field by its current label. Can change label, type, placeholder, or required.",
+    parameters: [
+      {
+        name: "currentLabel",
+        type: "string",
+        description: "The current label of the field to update",
+        required: true,
+      },
+      {
+        name: "label",
+        type: "string",
+        description: "New label for the field",
+      },
+      {
+        name: "type",
+        type: "string",
+        description: "New type: text, number, or textarea",
+      },
+      {
+        name: "placeholder",
+        type: "string",
+        description: "New placeholder text",
+      },
+      {
+        name: "required",
+        type: "boolean",
+        description: "Whether the field is required",
+      },
+    ],
+    handler: ({ currentLabel, label, type, placeholder, required: isRequired }) => {
+      const target = fields.find(
+        (f) => f.label.toLowerCase() === currentLabel.toLowerCase(),
+      );
+      if (!target) return;
+      const updates: Partial<EditableField> = {};
+      if (label !== undefined) updates.label = label;
+      if (placeholder !== undefined) updates.placeholder = placeholder;
+      if (isRequired !== undefined) updates.required = isRequired;
+      if (type && ["text", "number", "textarea"].includes(type)) {
+        updates.type = type as FieldType;
+        if (type !== target.type) updates.options = {};
+      }
+      updateField(target.clientId, updates);
+    },
+  });
+
+  useCopilotAction({
+    name: "deleteField",
+    description: "Delete a field from the form by its label.",
+    parameters: [
+      {
+        name: "label",
+        type: "string",
+        description: "The label of the field to delete",
+        required: true,
+      },
+    ],
+    handler: ({ label }) => {
+      const target = fields.find(
+        (f) => f.label.toLowerCase() === label.toLowerCase(),
+      );
+      if (!target) return;
+      deleteField(target.clientId);
+    },
+  });
 
   function addField(type: FieldType) {
     const newField: EditableField = {
@@ -158,28 +289,33 @@ export function FormEditor({
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">
+          <div>
+            <span className="mb-2 block text-sm font-medium text-gray-700">
               Add field:
             </span>
-            <button
-              onClick={() => addField("text")}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Text
-            </button>
-            <button
-              onClick={() => addField("number")}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Number
-            </button>
-            <button
-              onClick={() => addField("textarea")}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Textarea
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => addField("text")}
+                className="flex items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+              >
+                <span className="text-base leading-none">Aa</span>
+                Text
+              </button>
+              <button
+                onClick={() => addField("number")}
+                className="flex items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+              >
+                <span className="text-base leading-none">#</span>
+                Number
+              </button>
+              <button
+                onClick={() => addField("textarea")}
+                className="flex items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+              >
+                <span className="text-base leading-none">&#9776;</span>
+                Textarea
+              </button>
+            </div>
           </div>
         </div>
 
@@ -239,6 +375,7 @@ export function FormEditor({
           />
         </div>
       )}
+
     </div>
   );
 }

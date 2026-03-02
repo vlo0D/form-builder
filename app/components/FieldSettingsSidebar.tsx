@@ -42,8 +42,24 @@ export function FieldSettingsSidebar({
       </div>
 
       <div className="flex-1 space-y-4 overflow-y-auto">
-        <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-600">
-          Type: <span className="font-medium capitalize">{field.type}</span>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Type
+          </label>
+          <select
+            value={field.type}
+            onChange={(e) =>
+              onUpdate({
+                type: e.target.value as EditableField["type"],
+                options: {},
+              })
+            }
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+          >
+            <option value="text">Text</option>
+            <option value="number">Number</option>
+            <option value="textarea">Textarea</option>
+          </select>
         </div>
 
         <div>

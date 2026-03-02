@@ -13,14 +13,14 @@ export const submissionRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const form = await ctx.prisma.form.findUnique({
-        where: { id: input.formId, published: true },
+        where: { id: input.formId },
         include: { fields: { orderBy: { order: "asc" } } },
       });
 
       if (!form) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Form not found or not published",
+          message: "Form not found",
         });
       }
 

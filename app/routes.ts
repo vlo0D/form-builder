@@ -13,7 +13,9 @@ export default [
 
   layout("routes/admin.layout.tsx", [
     route("admin", "routes/admin._index.tsx"),
+    route("admin/logout", "routes/admin.logout.tsx"),
     route("admin/forms/new", "routes/admin.forms.new.tsx"),
     route("admin/forms/:id/edit", "routes/admin.forms.$id.edit.tsx"),
+    route("admin/forms/:id/submissions", "routes/admin.forms.$id.submissions.tsx"),
   ]),
 ] satisfies RouteConfig;

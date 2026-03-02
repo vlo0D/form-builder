@@ -20,6 +20,8 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@copilotkit/react-core": "^1.52.1",
+    "@copilotkit/react-ui": "^1.52.1",
     "@prisma/client": "6.19.2",
     "@react-router/node": "7.12.0",
     "@react-router/serve": "7.12.0",

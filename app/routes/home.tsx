@@ -10,7 +10,7 @@ export async function loader({ request }: { request: Request }) {
 export function meta() {
   return [
     { title: "Form Builder" },
-    { name: "description", content: "Fill out published forms" },
+    { name: "description", content: "Fill out available forms" },
   ];
 }
 
@@ -26,7 +26,7 @@ export default function Home() {
             to="/login"
             className="text-sm font-medium text-blue-600 hover:text-blue-700"
           >
-            Admin Login
+            Admin
           </Link>
         </div>
       </header>
@@ -38,7 +38,7 @@ export default function Home() {
 
         {forms.length === 0 ? (
           <div className="flex h-48 items-center justify-center rounded-xl border-2 border-dashed border-gray-300 text-gray-500">
-            No published forms yet.
+            No forms yet.
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
