@@ -1,0 +1,65 @@
+import {
+  isRouteErrorResponse,
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  Link,
+} from "react-router";
+
+import "./app.css";
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body className="bg-white text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100">
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+export default function App() {
+  return <Outlet />;
+}
+
+export function ErrorBoundary({ error }: { error: unknown }) {
+  let message = "Oops!";
+  let details = "An unexpected error occurred.";
+  let stack: string | undefined;
+
+  if (isRouteErrorResponse(error)) {
+    message = error.status === 404 ? "404" : "Error";
+    details =
+      error.status === 404
+        ? "The requested page could not be found."
+        : error.statusText || details;
+  } else if (import.meta.env.DEV && error && error instanceof Error) {
+    details = error.message;
+    stack = error.stack;
+  }
+
+  return (
+    <main className="mx-auto max-w-xl p-4 pt-16">
+      <h1 className="mb-2 text-2xl font-bold">{message}</h1>
+      <p className="mb-4 text-gray-600">{details}</p>
+      {stack && (
+        <pre className="w-full overflow-x-auto rounded-lg bg-gray-100 p-4 text-sm">
+          <code>{stack}</code>
+        </pre>
+      )}
+      <Link to="/" className="mt-4 inline-block text-blue-600 hover:underline">
+        Go home
+      </Link>
+    </main>
+  );
+}
