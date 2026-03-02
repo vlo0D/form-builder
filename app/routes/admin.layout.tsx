@@ -4,6 +4,8 @@ import { CopilotPopup } from "@copilotkit/react-ui";
 import { requireUserId } from "~/server/auth.server";
 import { destroyUserSession } from "~/server/auth.server";
 
+const copilotApiKey = import.meta.env.VITE_COPILOT_CLOUD_PUBLIC_API_KEY;
+
 export async function loader({ request }: { request: Request }) {
   await requireUserId(request);
   return null;
@@ -13,9 +15,8 @@ export async function action({ request }: { request: Request }) {
   return destroyUserSession(request);
 }
 
-export default function AdminLayout() {
+function AdminContent() {
   return (
-    <CopilotKit publicApiKey={import.meta.env.VITE_COPILOT_CLOUD_PUBLIC_API_KEY}>
     <div className="min-h-screen bg-gray-50">
       <nav className="border-b border-gray-200 bg-white shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -62,13 +63,24 @@ export default function AdminLayout() {
         <Outlet />
       </main>
     </div>
-    <CopilotPopup
-      instructions="You are a form builder assistant. You help users add, edit, and delete form fields via chat. Available field types: text, number, textarea. Each field has a label, placeholder, required flag, and type-specific options. When the user asks to add a field, use the addField action. When they ask to change a field, use updateField. When they ask to remove a field, use deleteField. Respond in the same language the user writes in."
-      labels={{
-        title: "AI Assistant",
-        initial: "Describe what fields to add, e.g. 'Add a required phone field'",
-      }}
-    />
+  );
+}
+
+export default function AdminLayout() {
+  if (!copilotApiKey) {
+    return <AdminContent />;
+  }
+
+  return (
+    <CopilotKit publicApiKey={copilotApiKey}>
+      <AdminContent />
+      <CopilotPopup
+        instructions="You are a form builder assistant. You help users add, edit, and delete form fields via chat. Available field types: text, number, textarea. Each field has a label, placeholder, required flag, and type-specific options. When the user asks to add a field, use the addField action. When they ask to change a field, use updateField. When they ask to remove a field, use deleteField. Respond in the same language the user writes in."
+        labels={{
+          title: "AI Assistant",
+          initial: "Describe what fields to add, e.g. 'Add a required phone field'",
+        }}
+      />
     </CopilotKit>
   );
 }

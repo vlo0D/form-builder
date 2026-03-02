@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { useNavigate } from "react-router";
 import { useCopilotReadable, useCopilotAction } from "@copilotkit/react-core";
 import { FormPreview } from "./FormPreview";
@@ -8,6 +8,8 @@ import {
 } from "./FieldSettingsSidebar";
 import { trpc } from "~/lib/trpc";
 import type { FieldType } from "~/lib/validation";
+
+const copilotEnabled = !!import.meta.env.VITE_COPILOT_CLOUD_PUBLIC_API_KEY;
 
 interface FormEditorProps {
   initialTitle?: string;
@@ -21,22 +23,23 @@ function generateClientId() {
   return `field_${Date.now()}_${nextId++}`;
 }
 
-export function FormEditor({
-  initialTitle = "",
-  initialDescription = "",
-  initialFields = [],
-  formId,
-}: FormEditorProps) {
-  const navigate = useNavigate();
-  const [title, setTitle] = useState(initialTitle);
-  const [description, setDescription] = useState(initialDescription);
-  const [fields, setFields] = useState<EditableField[]>(initialFields);
-  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-
-  const selectedField = fields.find((f) => f.clientId === selectedFieldId);
-
+function CopilotActions({
+  title,
+  description,
+  fields,
+  setFields,
+  setSelectedFieldId,
+  updateField,
+  deleteField,
+}: {
+  title: string;
+  description: string;
+  fields: EditableField[];
+  setFields: Dispatch<SetStateAction<EditableField[]>>;
+  setSelectedFieldId: Dispatch<SetStateAction<string | null>>;
+  updateField: (clientId: string, updates: Partial<EditableField>) => void;
+  deleteField: (clientId: string) => void;
+}) {
   useCopilotReadable({
     description: "Current form state: title, description, and list of fields with their settings",
     value: JSON.stringify({
@@ -167,6 +170,25 @@ export function FormEditor({
     },
   });
 
+  return null;
+}
+
+export function FormEditor({
+  initialTitle = "",
+  initialDescription = "",
+  initialFields = [],
+  formId,
+}: FormEditorProps) {
+  const navigate = useNavigate();
+  const [title, setTitle] = useState(initialTitle);
+  const [description, setDescription] = useState(initialDescription);
+  const [fields, setFields] = useState<EditableField[]>(initialFields);
+  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const selectedField = fields.find((f) => f.clientId === selectedFieldId);
+
   function addField(type: FieldType) {
     const newField: EditableField = {
       clientId: generateClientId(),
@@ -255,6 +277,17 @@ export function FormEditor({
 
   return (
     <div className="flex gap-6">
+      {copilotEnabled && (
+        <CopilotActions
+          title={title}
+          description={description}
+          fields={fields}
+          setFields={setFields}
+          setSelectedFieldId={setSelectedFieldId}
+          updateField={updateField}
+          deleteField={deleteField}
+        />
+      )}
       <div className="flex-1">
         <div className="mb-6 space-y-4">
           {error && (
